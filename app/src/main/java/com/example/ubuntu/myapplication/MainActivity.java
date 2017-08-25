@@ -36,20 +36,24 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         intentFilter.addAction("mainServiceAction");
-        intentFilter.addAction("wpmServiceAction");
-        requestRecordAudioPermission();
+//        intentFilter.addAction("wpmServiceAction");
+//        requestRecordAudioPermission();
     }
 
     protected void start() {
-        Toast.makeText(getApplicationContext(), "Start", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, WPMService.class);
+        Toast.makeText(this, "Start", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, OrientationService.class);
         startService(intent);
+        Intent mainIntent = new Intent(this, MainService.class);
+        startService(mainIntent);
         mainServiceRunning = true;
     }
 
     protected void stop() {
         Toast.makeText(getApplicationContext(), "Stop", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, WPMService.class);
+        Intent intent = new Intent(this, OrientationService.class);
+        Intent mainIntent = new Intent(this, MainService.class);
+        stopService(mainIntent);
         stopService(intent);
         mainServiceRunning = false;
 

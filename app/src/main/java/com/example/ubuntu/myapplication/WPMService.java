@@ -14,18 +14,22 @@ import java.util.ArrayList;
 public class WPMService extends Service {
     Intent speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
     SpeechRecognizer speechRecognizer = null;
+    long speechLength = 0;
+    long pauseLength = 0;
+    long startTimeStamp, endTimeStamp;
+    float wps = 0;
     public WPMService() {
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-
+        startTimeStamp = System.currentTimeMillis();
         startListening();
     }
 
     public void startListening() {
-        SpeechRecognizer speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
         speechRecognizer.setRecognitionListener(new listener());
         speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         speechIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, "com.example.ubuntu.myapplication");
@@ -51,6 +55,9 @@ public class WPMService extends Service {
 
         @Override
         public void onBeginningOfSpeech() {
+            endTimeStamp = System.currentTimeMillis();
+            // Calculate the time for which the speaker was silent.
+            pauseLength = (endTimeStamp - startTimeStamp)/1000;
 
         }
 
@@ -66,6 +73,10 @@ public class WPMService extends Service {
 
         @Override
         public void onEndOfSpeech() {
+            endTimeStamp = System.currentTimeMillis();
+            // Calculate the time for which the speaker was speaking.
+            speechLength = (endTimeStamp - startTimeStamp)/1000;
+            startTimeStamp = endTimeStamp;
             Intent broadcastIntent = new Intent();
             broadcastIntent.setAction("wpmServiceAction");
             broadcastIntent.putExtra("Data", "end");
@@ -84,9 +95,16 @@ public class WPMService extends Service {
             if (data != null) {
                 str += data.get(0);
             }
+            String [] spoken_words = str.split(" ");
+            if (speechLength != 0) {
+                wps = spoken_words.length / speechLength;
+            }
             Intent broadcastIntent = new Intent();
             broadcastIntent.setAction("wpmServiceAction");
             broadcastIntent.putExtra("Data", str);
+            broadcastIntent.putExtra("speechLength", speechLength);
+            broadcastIntent.putExtra("pauseLength", pauseLength);
+            broadcastIntent.putExtra("wps", wps);
             sendBroadcast(broadcastIntent);
         }
 
