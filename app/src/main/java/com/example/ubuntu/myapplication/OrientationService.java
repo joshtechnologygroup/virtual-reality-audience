@@ -8,9 +8,17 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
+import android.os.SystemClock;
+import android.util.Log;
+import android.widget.Chronometer;
 import android.widget.Toast;
 
-public class OrientationService extends Service implements SensorEventListener{
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static com.google.android.gms.internal.zzagz.runOnUiThread;
+
+public class OrientationService extends Service implements SensorEventListener {
 
     private Sensor mRotationSensor;
     private Sensor mAccelerometer;
@@ -26,18 +34,54 @@ public class OrientationService extends Service implements SensorEventListener{
     private Intent broadcastIntent;
     private SensorManager mSensorManager;
     private static final int SENSOR_DELAY = 500 * 1000; // 500ms
+    private float standardDegreeLeft, standardDegreeRight;
+    private Timer disorientedTimer, orientedTimer;
+    private float disorientedTime = 0, orientedTime = 0;
+    private boolean standardDegreeSet;
+    private boolean pauseOrientedTimer = false;
 
     public OrientationService() {
     }
 
     @Override
-    public IBinder onBind(Intent intent) {return null; }
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        standardDegreeSet = false;
         broadcastIntent = new Intent();
         broadcastIntent.setAction("orientationServiceAction");
+        disorientedTimer = new Timer();
+        orientedTimer = new Timer();
+        disorientedTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (pauseOrientedTimer) {
+                            disorientedTime++;
+                        }
+                    }
+                });
+            }
+        }, 1000, 1000);
+        orientedTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!pauseOrientedTimer) {
+                            orientedTime++;
+                        }
+                    }
+                });
+            }
+        }, 1000, 1000);
         try {
             mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
             mRotationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
@@ -74,7 +118,7 @@ public class OrientationService extends Service implements SensorEventListener{
             SensorManager.getRotationMatrix(mR, null, mLastAccelerometer, mLastMagnetometer);
             SensorManager.getOrientation(mR, mOrientation);
             float azimuthInRadians = mOrientation[0];
-            float azimuthInDegrees = (float)(Math.toDegrees(azimuthInRadians)+360)%360;
+            float azimuthInDegrees = (float) (Math.toDegrees(azimuthInRadians) + 360) % 360;
             update(null, azimuthInDegrees, true);
         }
     }
@@ -87,6 +131,18 @@ public class OrientationService extends Service implements SensorEventListener{
     private void update(float[] vectors, float degreeInput, boolean isOrientation) {
         if (isOrientation) {
             degree = degreeInput;
+            if (!standardDegreeSet) {
+                standardDegreeSet = true;
+                standardDegreeRight = degree + 60;
+                if (standardDegreeRight > 360) {
+                    standardDegreeRight -= 360;
+                }
+                standardDegreeLeft = degree - 60;
+                if (standardDegreeLeft < 0) {
+                    standardDegreeLeft += 360;
+                }
+            }
+
         } else {
             float[] rotationMatrix = new float[9];
             SensorManager.getRotationMatrixFromVector(rotationMatrix, vectors);
@@ -98,7 +154,13 @@ public class OrientationService extends Service implements SensorEventListener{
             SensorManager.getOrientation(adjustedRotationMatrix, orientation);
             pitch = orientation[1] * FROM_RADS_TO_DEGS;
         }
-        broadcastIntent.putExtra("Data", "Pitch: " + pitch + "  " + "Degree: " + degree );
+        if (pitch > 30 || pitch < -35 || degree > standardDegreeRight || degree < standardDegreeLeft) {
+            pauseOrientedTimer = true;
+        } else {
+            pauseOrientedTimer = false;
+        }
+        broadcastIntent.putExtra("orientedTime", Float.toString(orientedTime));
+        broadcastIntent.putExtra("disorientedTime", Float.toString(disorientedTime));
         sendBroadcast(broadcastIntent);
     }
 

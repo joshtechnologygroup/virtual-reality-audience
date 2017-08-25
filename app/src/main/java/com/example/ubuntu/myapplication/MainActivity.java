@@ -20,7 +20,6 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
     boolean mainServiceRunning = false;
     private IntentFilter intentFilter = new IntentFilter();
-    private Context context;
     private TextView textView;
 
     private void requestRecordAudioPermission() {
@@ -36,27 +35,35 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         intentFilter.addAction("mainServiceAction");
-//        intentFilter.addAction("wpmServiceAction");
-//        requestRecordAudioPermission();
+        intentFilter.addAction("orientationServiceAction");
+        requestRecordAudioPermission();
     }
 
     protected void start() {
         Toast.makeText(this, "Start", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, OrientationService.class);
         startService(intent);
-        Intent mainIntent = new Intent(this, MainService.class);
-        startService(mainIntent);
+//        intent = new Intent(this, WPMService.class);
+//        startService(intent);
+        intent = new Intent(this, WearService.class);
+        startService(intent);
+        intent = new Intent(this, MainService.class);
+        startService(intent);
         mainServiceRunning = true;
     }
 
     protected void stop() {
-        Toast.makeText(getApplicationContext(), "Stop", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, OrientationService.class);
-        Intent mainIntent = new Intent(this, MainService.class);
-        stopService(mainIntent);
+        Toast.makeText(getApplicationContext(), "Stop", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(this, MainService.class);
         stopService(intent);
-        mainServiceRunning = false;
+        intent = new Intent(this, OrientationService.class);
+        stopService(intent);
+//        intent = new Intent(this, WPMService.class);
+//        stopService(intent);
+        intent = new Intent(this, WearService.class);
+        stopService(intent);
 
+        mainServiceRunning = false;
     }
 
     @Override
@@ -89,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            textView.setText(intent.getStringExtra("Data"));
+            textView.setText(intent.getStringExtra("data"));
         }
     };
 
@@ -113,5 +120,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stop();
+        unregisterReceiver(mReceiver);
     }
 }

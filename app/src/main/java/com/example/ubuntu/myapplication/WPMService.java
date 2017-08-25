@@ -39,6 +39,13 @@ public class WPMService extends Service {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        speechRecognizer.cancel();
+        speechRecognizer.stopListening();
+    }
+
+    @Override
     public IBinder onBind(Intent intent) {
         throw new UnsupportedOperationException("Not yet implemented");
     }
