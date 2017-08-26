@@ -61,6 +61,7 @@ public class MainActivity extends WearableActivity implements SensorEventListene
 
     private void sendToast(final String message) {
         final GoogleApiClient client = getGoogleApiClient(this);
+        Log.e("asdsad", nodeId);
         if (nodeId != null) {
             new Thread(new Runnable() {
                 @Override

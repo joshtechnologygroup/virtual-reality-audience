@@ -19,7 +19,6 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
     boolean mainServiceRunning = false;
     private IntentFilter intentFilter = new IntentFilter();
-    private TextView textView;
     private String [] requiredPermissions = new String[]{Manifest.permission.RECORD_AUDIO};
 
     private void requestSystemPermissions() {
@@ -41,28 +40,36 @@ public class MainActivity extends AppCompatActivity {
 
     protected void start() {
         Toast.makeText(this, "Start", Toast.LENGTH_SHORT).show();
+
         Intent intent = new Intent(this, SoundFeedbackService.class);
         startService(intent);
-        Intent wpsIntent = new Intent(this, WPMService.class);
-        startService(wpsIntent);
-        Intent mainIntent = new Intent(this, MainService.class);
-        startService(mainIntent);
+
+        intent = new Intent(this, WPMService.class);
+        startService(intent);
+
         intent = new Intent(this, WearService.class);
         startService(intent);
+
+        intent = new Intent(this, OrientationService.class);
+        startService(intent);
+
+        intent = new Intent(this, MainService.class);
+        startService(intent);
+
         mainServiceRunning = true;
     }
 
     protected void stop() {
         Toast.makeText(getApplicationContext(), "Stop", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, OrientationService.class);
-        Intent mainIntent = new Intent(this, MainService.class);
-        Intent wpsIntent = new Intent(this, WPMService.class);
-        stopService(mainIntent);
+        Intent intent = new Intent(this, MainService.class);
         stopService(intent);
-        stopService(wpsIntent);
+        intent = new Intent(this, WPMService.class);
+        stopService(intent);
         intent = new Intent(this, SoundFeedbackService.class);
         stopService(intent);
         intent = new Intent(this, WearService.class);
+        stopService(intent);
+        intent = new Intent(this, OrientationService.class);
         stopService(intent);
         mainServiceRunning = false;
     }
@@ -101,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            textView.setText(intent.getStringExtra("data"));
+            float totalPercentage = intent.getFloatExtra("totalPercentage", 0);
         }
     };
 

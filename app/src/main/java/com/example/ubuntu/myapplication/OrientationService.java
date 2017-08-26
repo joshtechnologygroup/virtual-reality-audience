@@ -51,6 +51,7 @@ public class OrientationService extends Service implements SensorEventListener {
     @Override
     public void onCreate() {
         super.onCreate();
+
         standardDegreeSet = false;
         broadcastIntent = new Intent();
         broadcastIntent.setAction("orientationServiceAction");
@@ -129,6 +130,7 @@ public class OrientationService extends Service implements SensorEventListener {
     }
 
     private void update(float[] vectors, float degreeInput, boolean isOrientation) {
+
         if (isOrientation) {
             degree = degreeInput;
             if (!standardDegreeSet) {

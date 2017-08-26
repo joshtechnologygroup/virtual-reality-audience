@@ -3,6 +3,7 @@ package com.example.ubuntu.myapplication;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.wearable.MessageEvent;
@@ -37,7 +38,7 @@ public class WearService extends WearableListenerService {
                         heartRate /= heartRates.size();
                         Intent broadcastIntent = new Intent();
                         broadcastIntent.setAction("wearServiceAction");
-                        broadcastIntent.putExtra("heartRate", heartRate);
+                        broadcastIntent.putExtra("heartRate", String.valueOf(heartRate));
                         sendBroadcast(broadcastIntent);
                         heartRates.clear();
                         heartRates.add(heartRate);
