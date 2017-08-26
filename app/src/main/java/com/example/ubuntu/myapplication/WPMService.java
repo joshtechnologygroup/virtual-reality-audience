@@ -8,6 +8,7 @@ import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -46,8 +47,7 @@ public class WPMService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        speechRecognizer.cancel();
-        speechRecognizer.stopListening();
+        speechRecognizer.destroy();
     }
 
     @Override
@@ -59,18 +59,14 @@ public class WPMService extends Service {
     private class listener implements RecognitionListener {
         @Override
         public void onReadyForSpeech(Bundle bundle) {
-            Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction("wpmServiceAction");
-            broadcastIntent.putExtra("Data", "ready");
-            sendBroadcast(broadcastIntent);
+
         }
 
         @Override
         public void onBeginningOfSpeech() {
-            endTimeStamp = System.currentTimeMillis();
-            // Calculate the time for which the speaker was silent.
-            pauseLength = (endTimeStamp - startTimeStamp)/1000;
-
+            long currentTimeStamp = System.currentTimeMillis();
+            pauseLength = Math.abs(startTimeStamp - currentTimeStamp)/1000;
+            startTimeStamp = currentTimeStamp;
         }
 
         @Override
@@ -89,10 +85,6 @@ public class WPMService extends Service {
             // Calculate the time for which the speaker was speaking.
             speechLength = (endTimeStamp - startTimeStamp)/1000;
             startTimeStamp = endTimeStamp;
-            Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction("wpmServiceAction");
-            broadcastIntent.putExtra("Data", "end");
-            sendBroadcast(broadcastIntent);
         }
 
         @Override
@@ -148,18 +140,14 @@ public class WPMService extends Service {
             }
             Intent broadcastIntent = new Intent();
             broadcastIntent.setAction("wpmServiceAction");
-            broadcastIntent.putExtra("Data", str);
-            broadcastIntent.putExtra("speechLength", speechLength);
-            broadcastIntent.putExtra("pauseLength", pauseLength);
-            broadcastIntent.putExtra("wps", wps);
+            broadcastIntent.putExtra("speechLength", String.valueOf(speechLength));
+            broadcastIntent.putExtra("pauseLength", String.valueOf(pauseLength));
+            broadcastIntent.putExtra("wps", Float.toString(wps));
             sendBroadcast(broadcastIntent);
         }
 
         public void onPartialResults(Bundle partialResults) {
-            Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction("wpmServiceAction");
-            broadcastIntent.putExtra("Data", "partial");
-            sendBroadcast(broadcastIntent);
+
         }
 
         public void onEvent(int eventType, Bundle params) {

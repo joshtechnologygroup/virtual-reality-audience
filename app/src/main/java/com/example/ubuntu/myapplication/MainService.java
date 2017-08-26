@@ -93,12 +93,9 @@ public class MainService extends Service {
                 }
             }
             else if (intent.getAction().equals("wpmServiceAction")) {
-                speechLength = intent.getIntExtra("speechLength", 0);
-                pauseLength = intent.getIntExtra("pauseLength", 0);
-                wps = intent.getFloatExtra("wps", 0);
                 Toast.makeText(
                     getApplicationContext(),
-                        broadcastIntent.getStringExtra("Data") + "spelength:" + speechLength + ", paulength:" + pauseLength + ", wps:" + wps,
+                        "spelength: " + intent.getStringExtra("speechLength") + ", paulength:" + intent.getStringExtra("pauseLength") + ", wps:" + intent.getStringExtra("wps"),
                     Toast.LENGTH_LONG
                 ).show();
             }

@@ -36,7 +36,7 @@ public class WearService extends WearableListenerService {
                         }
                         heartRate /= heartRates.size();
                         Intent broadcastIntent = new Intent();
-                        broadcastIntent.setAction("wpmServiceAction");
+                        broadcastIntent.setAction("wearServiceAction");
                         broadcastIntent.putExtra("heartRate", heartRate);
                         sendBroadcast(broadcastIntent);
                         heartRates.clear();

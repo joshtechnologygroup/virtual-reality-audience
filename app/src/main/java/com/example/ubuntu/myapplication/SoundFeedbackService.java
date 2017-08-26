@@ -12,6 +12,7 @@ import java.io.IOException;
 
 public class SoundFeedbackService extends Service {
     private MediaPlayer mediaPlayer;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -31,7 +32,7 @@ public class SoundFeedbackService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals("mainServiceAction")) {
-                mediaPlayer.stop();
+//                mediaPlayer.stop();
             }
         }
     };
