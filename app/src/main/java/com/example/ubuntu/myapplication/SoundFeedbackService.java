@@ -70,7 +70,7 @@ public class SoundFeedbackService extends Service {
                             startPlayer();
                         }
                     });
-                } else if (totalPercentage > 30 && time > 10 && maxBoo > 0){
+                } else if (totalPercentage < 50 && time > 10 && maxBoo > 0){
                     time = 0;
                     maxBoo--;
                     mediaPlayer.stop();

@@ -39,7 +39,7 @@ public class AudienceActivity extends AppCompatActivity{
     private static final String STATE_VIDEO_DURATION = "videoDuration";
     private static final String STATE_PROGRESS_TIME = "progressTime";
     private int badVideoCount = 1;
-    private boolean videoGood = true;
+    private int videoNumber = 1;
     private boolean videoOK = false;
     private String data;
     private BroadcastReceiver mReceiver;
@@ -221,20 +221,18 @@ public class AudienceActivity extends AppCompatActivity{
                             Log.d("Exception raised", "on video view");
                         }
                     }
-                    else if(totalPercentage < 70){
+                    else if(totalPercentage < 70 && videoNumber !=2){
                         try {
-                            if(!videoOK) {
-                                videoWidgetView.loadVideoFromAsset("medium.mp4", new VrVideoView.Options());
-                                videoOK = true;
-                            }
+                            videoWidgetView.loadVideoFromAsset("medium.mp4", new VrVideoView.Options());
+                            videoNumber = 2;
                         } catch (IOException e) {
                             Log.d("Exception raised", "on video view");
                         }
                     }
-                    else if(!videoGood){
+                    else if(totalPercentage >= 80 && videoNumber !=1){
                         try {
                             videoWidgetView.loadVideoFromAsset("start.mp4", new VrVideoView.Options());
-                            videoGood = true;
+                            videoNumber = 1;
                         } catch (IOException e) {
                             Log.d("Exception raised", "on video view");
                         }

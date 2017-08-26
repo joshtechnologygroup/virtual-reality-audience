@@ -131,8 +131,8 @@ public class MainService extends Service {
                 Log.d("MainService", "-> SpeechService -> pauseLength:" + pauseLength);
             }
             totalPercentage = ((6 * heartRatePercentage) + (4 * orientationPercentage) + (10 * wpmPercentage) + (10 * speechPercentage))/30;
-            Log.d("MainService", "Hr: " + heartRatePercentage + " Or: " + orientationPercentage + " wpm: "+ wpmPercentage + " sp: " + speechPercentage);
-            Log.d("MainService", "-> totalPercentage" + totalPercentage);
+            Log.d("MainService", "Hr: " + heartRatePercentage + "   Or: " + orientationPercentage + " wpm: "+ wpmPercentage + " sp: " + speechPercentage);
+            Log.d("MainService", "Receiver -> totalPercentage:"  + totalPercentage);
         }
     };
 
