@@ -41,7 +41,7 @@ public class MainService extends Service {
                         e.printStackTrace();
                     }
                     broadcastIntent = new Intent("mainServiceAction");
-                    broadcastIntent.putExtra("totalPercentage", Float.toString(totalPercentage));
+                    broadcastIntent.putExtra("totalPercentage", totalPercentage);
                     sendBroadcast(broadcastIntent);
                 }
             }
@@ -97,28 +97,32 @@ public class MainService extends Service {
             } else if (intent.getAction().equals("wpmServiceAction")) {
                 speechLength = intent.getLongExtra("speechLength", 0);
                 pauseLength = intent.getLongExtra("pauseLength", 0);
-                wpm = intent.getFloatExtra("wpm", 0);
-                if (speechLength > 15000 || pauseLength > 5000) {
-                    speechPercentage = 20;
-                } else if (speechLength > 13000 || pauseLength > 4000 || pauseLength < 1500) {
-                    speechPercentage = 40;
-                } else if (speechLength > 12000 || pauseLength > 3500 || pauseLength < 2000) {
-                    speechPercentage = 60;
-                } else if (speechLength > 10000 || pauseLength > 3000 || pauseLength < 2500) {
-                    speechPercentage = 80;
+                boolean onlyWpm = intent.getBooleanExtra("onlyWpm", false);
+                if (onlyWpm) {
+                    wpm = intent.getFloatExtra("wpm", 0);
+                    if (wpm > 170 || wpm < 20) {
+                        wpmPercentage = 20;
+                    } else if (wpm > 160 || wpm < 40) {
+                        wpmPercentage = 40;
+                    } else if (wpm > 140 || wpm < 60) {
+                        wpmPercentage = 60;
+                    } else if (wpm > 120 || wpm < 80) {
+                        wpmPercentage = 80;
+                    } else {
+                        wpmPercentage = 100;
+                    }
                 } else {
-                    speechPercentage = 100;
-                }
-                if (wpm > 170 || wpm < 20) {
-                    wpmPercentage = 20;
-                } else if (wpm > 160 || wpm < 40) {
-                    wpmPercentage = 40;
-                } else if (wpm > 140 || wpm < 60) {
-                    wpmPercentage = 60;
-                } else if (wpm > 120 || wpm < 80) {
-                    wpmPercentage = 80;
-                } else {
-                    wpmPercentage = 100;
+                    if (speechLength > 15000 || pauseLength > 5000) {
+                        speechPercentage = 20;
+                    } else if (speechLength > 13000 || pauseLength > 4000 || pauseLength < 1500) {
+                        speechPercentage = 40;
+                    } else if (speechLength > 12000 || pauseLength > 3500 || pauseLength < 2000) {
+                        speechPercentage = 60;
+                    } else if (speechLength > 10000 || pauseLength > 3000 || pauseLength < 2500) {
+                        speechPercentage = 80;
+                    } else {
+                        speechPercentage = 100;
+                    }
                 }
             }
             totalPercentage = ((6 * heartRatePercentage) + (8 * orientationPercentage) + (10 * wpmPercentage) + (6 * speechPercentage))/30;

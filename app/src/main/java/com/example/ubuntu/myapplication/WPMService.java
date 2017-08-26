@@ -54,6 +54,7 @@ public class WPMService extends Service {
                 Intent broadcastIntent = new Intent();
                 broadcastIntent.setAction("wpmServiceAction");
                 broadcastIntent.putExtra("wpm", wpm);
+                broadcastIntent.putExtra("onlyWpm", true);
                 sendBroadcast(broadcastIntent);
                 // Reset the word list so that new words can be stored in the list;
                 wordList = new ArrayList<String>();

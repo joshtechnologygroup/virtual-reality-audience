@@ -8,8 +8,6 @@ import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.os.IBinder;
 
-import java.io.IOException;
-
 public class SoundFeedbackService extends Service {
     private MediaPlayer mediaPlayer;
 
@@ -32,7 +30,7 @@ public class SoundFeedbackService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals("mainServiceAction")) {
-                float totalPercentage = Float.parseFloat(intent.getStringExtra("totalPercentage"));
+                float totalPercentage = intent.getFloatExtra("totalPercentage", 0);
             }
         }
     };
