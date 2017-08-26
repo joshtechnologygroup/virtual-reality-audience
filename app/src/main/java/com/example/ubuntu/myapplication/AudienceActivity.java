@@ -203,13 +203,15 @@ public class AudienceActivity extends AppCompatActivity{
     @Override
     public void onResume() {
         super.onResume();
-        // Resume the 3D rendering.
+        videoWidgetView.resumeRendering();
+        videoWidgetView.setDisplayMode(
+                VrVideoView.DisplayMode.FULLSCREEN_STEREO
+        );
         mReceiver = new BroadcastReceiver() {
-
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (intent.getAction().equals("mainServiceAction")) {
-                    float totalPercentage = Float.parseFloat(intent.getStringExtra("totalPercentage"));
+                    float totalPercentage = intent.getFloatExtra("totalPercentage", 0);
                     Log.d("Video", ""+videoWidgetView);
                     if(totalPercentage < 30 && badVideoCount > 0){
                         try {
@@ -219,18 +221,20 @@ public class AudienceActivity extends AppCompatActivity{
                             Log.d("Exception raised", "on video view");
                         }
                     }
-                    else if(totalPercentage < 70 && !videoOK){
+                    else if(totalPercentage < 70){
                         try {
-                            if(videoWidgetView.getDuration() < 7000)
+                            if(!videoOK) {
                                 videoWidgetView.loadVideoFromAsset("medium.mp4", new VrVideoView.Options());
+                                videoOK = true;
+                            }
                         } catch (IOException e) {
                             Log.d("Exception raised", "on video view");
                         }
                     }
                     else if(!videoGood){
                         try {
-                            if(videoWidgetView.getDuration() < 7000)
-                                videoWidgetView.loadVideoFromAsset("start.mp4", new VrVideoView.Options());
+                            videoWidgetView.loadVideoFromAsset("start.mp4", new VrVideoView.Options());
+                            videoGood = true;
                         } catch (IOException e) {
                             Log.d("Exception raised", "on video view");
                         }
@@ -240,10 +244,6 @@ public class AudienceActivity extends AppCompatActivity{
             }
         };
         registerReceiver(mReceiver, intentFilter);
-        videoWidgetView.resumeRendering();
-        videoWidgetView.setDisplayMode(
-                VrVideoView.DisplayMode.FULLSCREEN_STEREO
-        );
         // Update the text to account for the paused video in onPause().
         updateStatusText();
     }
