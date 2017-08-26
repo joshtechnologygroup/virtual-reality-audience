@@ -14,8 +14,12 @@
  */
 package com.example.ubuntu.myapplication;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.content.IntentFilter;
 import android.util.Log;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -23,6 +27,7 @@ import android.widget.TextView;
 import com.google.vr.sdk.widgets.video.VrVideoEventListener;
 import com.google.vr.sdk.widgets.video.VrVideoView;
 
+import java.io.IOException;
 import java.util.Locale;
 
 /**
@@ -33,7 +38,12 @@ public class AudienceActivity extends AppCompatActivity{
     private static final String STATE_IS_PAUSED = "isPaused";
     private static final String STATE_VIDEO_DURATION = "videoDuration";
     private static final String STATE_PROGRESS_TIME = "progressTime";
-
+    private int badVideoCount = 1;
+    private boolean videoGood = true;
+    private boolean videoOK = false;
+    private String data;
+    private BroadcastReceiver mReceiver;
+    private IntentFilter intentFilter = new IntentFilter();
     /**
      * The video view and its custom UI elements.
      */
@@ -58,6 +68,7 @@ public class AudienceActivity extends AppCompatActivity{
         seekBar = (SeekBar) findViewById(R.id.seek_bar);
         statusText = (TextView) findViewById(R.id.status_text);
         videoWidgetView = (VrVideoView) findViewById(R.id.video_view);
+        intentFilter.addAction("mainServiceAction");
         try {
             if (videoWidgetView.getDuration() <= 0) {
                 videoWidgetView.loadVideoFromAsset("start.mp4",
@@ -193,6 +204,42 @@ public class AudienceActivity extends AppCompatActivity{
     public void onResume() {
         super.onResume();
         // Resume the 3D rendering.
+        mReceiver = new BroadcastReceiver() {
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals("mainServiceAction")) {
+                    float totalPercentage = Float.parseFloat(intent.getStringExtra("totalPercentage"));
+                    Log.d("Video", ""+videoWidgetView);
+                    if(totalPercentage < 30 && badVideoCount > 0){
+                        try {
+                            videoWidgetView.loadVideoFromAsset("boo.mp4", new VrVideoView.Options());
+                            badVideoCount--;
+                        } catch (IOException e) {
+                            Log.d("Exception raised", "on video view");
+                        }
+                    }
+                    else if(totalPercentage < 70 && !videoOK){
+                        try {
+                            if(videoWidgetView.getDuration() < 7000)
+                                videoWidgetView.loadVideoFromAsset("medium.mp4", new VrVideoView.Options());
+                        } catch (IOException e) {
+                            Log.d("Exception raised", "on video view");
+                        }
+                    }
+                    else if(!videoGood){
+                        try {
+                            if(videoWidgetView.getDuration() < 7000)
+                                videoWidgetView.loadVideoFromAsset("start.mp4", new VrVideoView.Options());
+                        } catch (IOException e) {
+                            Log.d("Exception raised", "on video view");
+                        }
+                    }
+                }
+
+            }
+        };
+        registerReceiver(mReceiver, intentFilter);
         videoWidgetView.resumeRendering();
         videoWidgetView.setDisplayMode(
                 VrVideoView.DisplayMode.FULLSCREEN_STEREO
@@ -205,6 +252,7 @@ public class AudienceActivity extends AppCompatActivity{
     public void onDestroy() {
         // Destroy the widget and free memory.
         videoWidgetView.shutdown();
+        unregisterReceiver(mReceiver);
         super.onDestroy();
     }
 

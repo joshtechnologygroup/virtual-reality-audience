@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -17,9 +18,11 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     boolean mainServiceRunning = false;
+    private Intent broadcastIntent;
     private IntentFilter intentFilter = new IntentFilter();
     private String [] requiredPermissions = new String[]{Manifest.permission.RECORD_AUDIO};
-
+    private Intent audience;
+    private String data;
     private void requestSystemPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             for (String requiredPermission : requiredPermissions) {
@@ -77,7 +80,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        broadcastIntent = new Intent();
+        broadcastIntent.setAction("mainActivityAction");
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        audience = new Intent(this, AudienceActivity.class).putExtra("data", data);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -136,6 +142,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onVRInteractionClick(View v){
-        startActivity(new Intent(this,AudienceActivity.class));
+        startActivity(audience);
     }
 }
