@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 public class MainService extends Service {
     private boolean running = true;
@@ -80,9 +79,12 @@ public class MainService extends Service {
                 if (orientedTime == 0) {
                     orientedTime = 1;
                 }
+                Log.d("MainService", "-> OrientationService -> Oriented Time" + orientedTime);
+                Log.d("MainService", "-> OrientationService -> DisOriented Time" + disorientedTime);
                 orientationPercentage = (orientedTime / (orientedTime + disorientedTime)) * 100;
             } else if (intent.getAction().equals("wearServiceAction")) {
                 heartRatePercentage = Integer.parseInt(intent.getStringExtra("heartRate"));
+                Log.d("MainService", "-> WearService -> HeartRatePercentage" + heartRatePercentage);
                 if (heartRatePercentage >= 140) {
                     heartRatePercentage = 20;
                 } else if (heartRatePercentage >= 125) {
@@ -124,8 +126,12 @@ public class MainService extends Service {
                         speechPercentage = 100;
                     }
                 }
+                Log.d("MainService", "-> WpmService:" + wpm);
+                Log.d("MainService", "-> SpeechService -> speechlength:" + speechLength);
+                Log.d("MainService", "-> SpeechService -> pauseLength:" + pauseLength);
             }
             totalPercentage = ((6 * heartRatePercentage) + (8 * orientationPercentage) + (10 * wpmPercentage) + (6 * speechPercentage))/30;
+            Log.d("MainService", "-> totalPercentage" + totalPercentage);
         }
     };
 
