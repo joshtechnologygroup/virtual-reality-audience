@@ -50,9 +50,6 @@ public class MainActivity extends AppCompatActivity {
         intent = new Intent(this, WearService.class);
         startService(intent);
 
-        intent = new Intent(this, OrientationService.class);
-        startService(intent);
-
         intent = new Intent(this, MainService.class);
         startService(intent);
 
@@ -68,8 +65,6 @@ public class MainActivity extends AppCompatActivity {
         intent = new Intent(this, SoundFeedbackService.class);
         stopService(intent);
         intent = new Intent(this, WearService.class);
-        stopService(intent);
-        intent = new Intent(this, OrientationService.class);
         stopService(intent);
         mainServiceRunning = false;
     }
@@ -101,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        stop();
+//        stop();
         unregisterReceiver(mReceiver);
     }
 
@@ -138,5 +133,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void onVRInteractionClick(View v){
         startActivity(new Intent(this,AudienceActivity.class));
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stop();
     }
 }
