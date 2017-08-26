@@ -31,6 +31,9 @@ public class SoundFeedbackService extends Service {
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("mainServiceAction")) {
+                float totalPercentage = Float.parseFloat(intent.getStringExtra("totalPercentage"));
+            }
         }
     };
 

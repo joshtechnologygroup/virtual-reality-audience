@@ -108,7 +108,9 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            float totalPercentage = intent.getFloatExtra("totalPercentage", 0);
+            if (intent.getAction().equals("mainServiceAction")) {
+                float totalPercentage = Float.parseFloat(intent.getStringExtra("totalPercentage"));
+            }
         }
     };
 
