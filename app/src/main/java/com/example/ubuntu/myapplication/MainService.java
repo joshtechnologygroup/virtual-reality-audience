@@ -6,46 +6,39 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
-import android.os.SystemClock;
-import android.widget.Chronometer;
 import android.widget.Toast;
 
 public class MainService extends Service {
     private boolean running = true;
-    private Chronometer mChronometer;
     private Intent broadcastIntent;
     private IntentFilter intentFilter = new IntentFilter();
     long speechLength = 0;
     long pauseLength = 0;
     float wps = 0;
+    private float orientationPercentage;
+    private int heartRatePercentage;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mChronometer = new Chronometer(this);
-        mChronometer.setBase(SystemClock.elapsedRealtime());
-        mChronometer.start();
+        IntentFilter intentFilter = new IntentFilter();
         broadcastIntent = new Intent();
         broadcastIntent.setAction("mainServiceAction");
         intentFilter.addAction("orientationServiceAction");
         intentFilter.addAction("wpmServiceAction");
+        intentFilter.addAction("wearServiceAction");
         registerReceiver(mReceiver, intentFilter);
         new Thread(new Runnable() {
             public void run() {
-                while(running) {
+                while (running) {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    long elapsedMillis = SystemClock.elapsedRealtime() - mChronometer.getBase();
-                    int hours = (int) (elapsedMillis / 3600000);
-                    int minutes = (int) (elapsedMillis - hours * 3600000) / 60000;
-                    int seconds = (int) (elapsedMillis - hours * 3600000 - minutes * 60000) / 1000;
-                    int millis = (int) (elapsedMillis - hours * 3600000 - minutes * 60000 - seconds * 1000);
-                    broadcastIntent = new Intent();
-                    broadcastIntent.setAction("mainServiceAction");
-                    broadcastIntent.putExtra("Data", hours + ":" + minutes + ":" + seconds + ":" + millis);
+                    broadcastIntent = new Intent("mainServiceAction");
+                    broadcastIntent.putExtra("orientationPercentage", orientationPercentage);
+                    broadcastIntent.putExtra("heartRatePercentage", orientationPercentage);
                     sendBroadcast(broadcastIntent);
                 }
             }
@@ -72,29 +65,44 @@ public class MainService extends Service {
     public void onDestroy() {
         super.onDestroy();
         running = false;
-        mChronometer.stop();
         unregisterReceiver(mReceiver);
     }
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // Log data
             if (intent.getAction().equals("orientationServiceAction")) {
-                Toast.makeText(getApplicationContext(), intent.getStringExtra("Data"),
-                        Toast.LENGTH_SHORT).show();
+                float orientedTime = Float.parseFloat(intent.getStringExtra("orientedTime"));
+                float disorientedTime = Float.parseFloat(intent.getStringExtra("disorientedTime"));
+                if (orientedTime == 0) {
+                    orientedTime = 1;
+                }
+                orientationPercentage = (orientedTime / (orientedTime + disorientedTime)) * 100;
+            } else if (intent.getAction().equals("wearServiceAction")) {
+                heartRatePercentage = Integer.parseInt(intent.getStringExtra("heartRate"));
+                if (heartRatePercentage >= 140) {
+                    heartRatePercentage = 20;
+                } else if (heartRatePercentage >= 125) {
+                    heartRatePercentage = 40;
+                } else if (heartRatePercentage >= 115) {
+                    heartRatePercentage = 60;
+                } else if (heartRatePercentage >= 95) {
+                    heartRatePercentage = 80;
+                } else {
+                    heartRatePercentage = 100;
+                }
             }
-            if (intent.getAction().equals("wpmServiceAction")) {
+            else if (intent.getAction().equals("wpmServiceAction")) {
                 speechLength = intent.getIntExtra("speechLength", 0);
                 pauseLength = intent.getIntExtra("pauseLength", 0);
                 wps = intent.getFloatExtra("wps", 0);
                 Toast.makeText(
                     getApplicationContext(),
-                    "spelength:" + speechLength + ", paulength:" + pauseLength + ", wps:" + wps,
+                        broadcastIntent.getStringExtra("Data") + "spelength:" + speechLength + ", paulength:" + pauseLength + ", wps:" + wps,
                     Toast.LENGTH_LONG
                 ).show();
             }
-            }
+        }
     };
 
 }

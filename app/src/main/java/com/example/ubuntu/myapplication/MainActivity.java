@@ -20,7 +20,6 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
     boolean mainServiceRunning = false;
     private IntentFilter intentFilter = new IntentFilter();
-    private Context context;
     private TextView textView;
     private String [] requiredPermissions = new String[]{Manifest.permission.RECORD_AUDIO};
 
@@ -43,12 +42,14 @@ public class MainActivity extends AppCompatActivity {
 
     protected void start() {
         Toast.makeText(this, "Start", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, OrientationService.class);
+        Intent intent = new Intent(this, SoundFeedbackService.class);
         startService(intent);
         Intent wpsIntent = new Intent(this, WPMService.class);
-        startService(wpsIntent);
+//        startService(wpsIntent);
         Intent mainIntent = new Intent(this, MainService.class);
         startService(mainIntent);
+        intent = new Intent(this, WearService.class);
+        startService(intent);
         mainServiceRunning = true;
     }
 
@@ -60,8 +61,11 @@ public class MainActivity extends AppCompatActivity {
         stopService(mainIntent);
         stopService(intent);
         stopService(wpsIntent);
+        intent = new Intent(this, SoundFeedbackService.class);
+        stopService(intent);
+        intent = new Intent(this, WearService.class);
+        stopService(intent);
         mainServiceRunning = false;
-
     }
 
     @Override
@@ -101,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            textView.setText(intent.getStringExtra("Data"));
+            textView.setText(intent.getStringExtra("data"));
         }
     };
 
