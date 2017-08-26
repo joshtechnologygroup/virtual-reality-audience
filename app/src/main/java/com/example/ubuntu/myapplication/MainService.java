@@ -12,9 +12,9 @@ public class MainService extends Service {
     private boolean running = true;
     private Intent broadcastIntent;
     private IntentFilter intentFilter = new IntentFilter();
-    long speechLength = 0;
-    long pauseLength = 0;
-    float wps = 0;
+    long speechLength = 0; // in milliseconds
+    long pauseLength = 0; // in milliseconds
+    float wpm = 0; // Words per minute
     private float orientationPercentage;
     private int heartRatePercentage;
 
@@ -93,12 +93,12 @@ public class MainService extends Service {
                 }
             }
             else if (intent.getAction().equals("wpmServiceAction")) {
-                speechLength = intent.getIntExtra("speechLength", 0);
-                pauseLength = intent.getIntExtra("pauseLength", 0);
-                wps = intent.getFloatExtra("wps", 0);
+                speechLength = intent.getLongExtra("speechLength", 0);
+                pauseLength = intent.getLongExtra("pauseLength", 0);
+                wpm = intent.getFloatExtra("wpm", 0);
                 Toast.makeText(
                     getApplicationContext(),
-                        broadcastIntent.getStringExtra("Data") + "spelength:" + speechLength + ", paulength:" + pauseLength + ", wps:" + wps,
+                        intent.getStringExtra("Data") + "currSpeech:" + speechLength + ", currPause:" + pauseLength + ", wpm:" + wpm,
                     Toast.LENGTH_LONG
                 ).show();
             }

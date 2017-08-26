@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, SoundFeedbackService.class);
         startService(intent);
         Intent wpsIntent = new Intent(this, WPMService.class);
-//        startService(wpsIntent);
+        startService(wpsIntent);
         Intent mainIntent = new Intent(this, MainService.class);
         startService(mainIntent);
         intent = new Intent(this, WearService.class);
@@ -96,8 +96,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onStop() {
+        super.onStop();
         stop();
         unregisterReceiver(mReceiver);
     }
