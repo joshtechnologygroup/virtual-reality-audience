@@ -10,6 +10,7 @@ import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,10 +88,6 @@ public class WPMService extends Service {
     private class listener implements RecognitionListener {
         @Override
         public void onReadyForSpeech(Bundle bundle) {
-            Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction("wpmServiceAction");
-            broadcastIntent.putExtra("Data", "ready");
-            sendBroadcast(broadcastIntent);
             mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mStreamVolume, 0);
         }
 
@@ -100,7 +97,6 @@ public class WPMService extends Service {
             long currentTimeStamp = System.currentTimeMillis();
             pauseLength = abs(startTimeStamp - currentTimeStamp);
             startTimeStamp = currentTimeStamp;
-
         }
 
         @Override
@@ -119,10 +115,6 @@ public class WPMService extends Service {
             // Calculate the time for which the speaker was speaking.
             speechLength = (endTimeStamp - startTimeStamp);
             startTimeStamp = endTimeStamp;
-            Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction("wpmServiceAction");
-            broadcastIntent.putExtra("Data", "end");
-            sendBroadcast(broadcastIntent);
         }
 
         @Override
@@ -184,10 +176,7 @@ public class WPMService extends Service {
         }
 
         public void onPartialResults(Bundle partialResults) {
-            Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction("wpmServiceAction");
-            broadcastIntent.putExtra("Data", "partial");
-            sendBroadcast(broadcastIntent);
+
         }
 
         public void onEvent(int eventType, Bundle params) {
