@@ -15,11 +15,11 @@ public class MainService extends Service {
     long speechLength = 0; // in milliseconds
     long pauseLength = 0; // in milliseconds
     float wpm = 0; // Words per minute
-    private float orientationPercentage;
-    private int heartRatePercentage;
-    private int wpmPercentage;
-    private int speechPercentage;
-    private float totalPercentage;
+    private float orientationPercentage = 100;
+    private int heartRatePercentage = 100;
+    private int wpmPercentage = 100;
+    private int speechPercentage = 100;
+    private float totalPercentage = 100;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -102,9 +102,9 @@ public class MainService extends Service {
                 boolean onlyWpm = intent.getBooleanExtra("onlyWpm", false);
                 if (onlyWpm) {
                     wpm = intent.getFloatExtra("wpm", 0);
-                    if (wpm > 170 || wpm < 20) {
+                    if (wpm > 170 || wpm < 10) {
                         wpmPercentage = 20;
-                    } else if (wpm > 160 || wpm < 40) {
+                    } else if (wpm > 160 || wpm < 25) {
                         wpmPercentage = 40;
                     } else if (wpm > 140 || wpm < 60) {
                         wpmPercentage = 60;
@@ -130,7 +130,8 @@ public class MainService extends Service {
                 Log.d("MainService", "-> SpeechService -> speechlength:" + speechLength);
                 Log.d("MainService", "-> SpeechService -> pauseLength:" + pauseLength);
             }
-            totalPercentage = ((6 * heartRatePercentage) + (8 * orientationPercentage) + (10 * wpmPercentage) + (6 * speechPercentage))/30;
+            totalPercentage = ((6 * heartRatePercentage) + (4 * orientationPercentage) + (10 * wpmPercentage) + (10 * speechPercentage))/30;
+            Log.d("MainService", "Hr: " + heartRatePercentage + " Or: " + orientationPercentage + " wpm: "+ wpmPercentage + " sp: " + speechPercentage);
             Log.d("MainService", "-> totalPercentage" + totalPercentage);
         }
     };

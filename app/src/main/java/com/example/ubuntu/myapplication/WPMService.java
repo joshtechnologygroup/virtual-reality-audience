@@ -28,9 +28,10 @@ public class WPMService extends Service {
     public String mError;
     private static final String TAG = "WPMService";
     public ArrayList<String> wordList = new ArrayList<>();
-    public static final int wordCountInterVal = 1000 * 20; // 20 seconds
+    public static final int wordCountInterVal = 1000 * 15; // 15 seconds
     AudioManager mAudioManager;
     int mStreamVolume;
+    private boolean running = true;
 
     public WPMService() {
     }
@@ -43,23 +44,28 @@ public class WPMService extends Service {
         speechIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getPackageName());
         speechIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 0);
         speechIntent.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true);
-        mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         startListening();
-        Timer wpmTimer = new Timer();
-        wpmTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
+        new Thread(new Runnable() {
             public void run() {
-                // Calculate Words per minute and broadcast the value
-                float wpm = (wordList.size() * 1000 * 60 / wordCountInterVal);
-                Intent broadcastIntent = new Intent();
-                broadcastIntent.setAction("wpmServiceAction");
-                broadcastIntent.putExtra("wpm", wpm);
-                broadcastIntent.putExtra("onlyWpm", true);
-                sendBroadcast(broadcastIntent);
-                // Reset the word list so that new words can be stored in the list;
-                wordList = new ArrayList<String>();
+                while (running) {
+                    try {
+                        Thread.sleep(wordCountInterVal);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    float wpm = (wordList.size() * 1000 * 60 / wordCountInterVal);
+                    Intent broadcastIntent = new Intent();
+                    broadcastIntent.setAction("wpmServiceAction");
+                    broadcastIntent.putExtra("wpm", wpm);
+                    broadcastIntent.putExtra("onlyWpm", true);
+                    sendBroadcast(broadcastIntent);
+                    Log.d("Wpmse:   ", "" + wordList.size());
+                    // Reset the word list so that new words can be stored in the list;
+                    wordList = new ArrayList<String>();
+                }
             }
-        }, 1000, wordCountInterVal);
+        }).start();
 
     }
 
@@ -67,7 +73,7 @@ public class WPMService extends Service {
         // Getting system volume into var for later un-muting
         mStreamVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
-        if(speechRecognizer == null) {
+        if (speechRecognizer == null) {
             speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
             speechRecognizer.setRecognitionListener(new listener());
         }
@@ -77,7 +83,10 @@ public class WPMService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        speechRecognizer.destroy();
+        running = false;
+        if(speechRecognizer!=null) {
+            speechRecognizer.destroy();
+        }
     }
 
     @Override
@@ -90,6 +99,7 @@ public class WPMService extends Service {
         @Override
         public void onReadyForSpeech(Bundle bundle) {
             mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mStreamVolume, 0);
+            Log.d("112233", "ready");
         }
 
         @Override
@@ -127,7 +137,7 @@ public class WPMService extends Service {
                     startListening();
                     break;
                 case SpeechRecognizer.ERROR_NETWORK:
-                    mError = " network" ;
+                    mError = " network";
                     break;
                 case SpeechRecognizer.ERROR_AUDIO:
                     mError = " audio";
@@ -140,24 +150,24 @@ public class WPMService extends Service {
                     mError = " client";
                     break;
                 case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
-                    mError = " speech time out" ;
+                    mError = " speech time out";
                     speechRecognizer.destroy();
                     speechRecognizer = null;
                     startListening();
                     break;
                 case SpeechRecognizer.ERROR_NO_MATCH:
-                    mError = " no match" ;
+                    mError = " no match";
                     startListening();
                     break;
                 case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
-                    mError = " recogniser busy" ;
+                    mError = " recogniser busy";
                     break;
                 case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
-                    mError = " insufficient permissions" ;
+                    mError = " insufficient permissions";
                     break;
 
             }
-            Log.e(TAG,  "Error: " +  error + " - " + mError);
+            Log.e(TAG, "Error: " + error + " - " + mError);
         }
 
         public void onResults(Bundle results) {

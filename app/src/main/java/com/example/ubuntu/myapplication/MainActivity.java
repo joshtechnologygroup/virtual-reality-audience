@@ -43,8 +43,8 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, SoundFeedbackService.class);
         startService(intent);
 
-        intent = new Intent(this, OrientationService.class);
-        startService(intent);
+//        intent = new Intent(this, OrientationService.class);
+//        startService(intent);
 
         intent = new Intent(this, WPMService.class);
         startService(intent);
