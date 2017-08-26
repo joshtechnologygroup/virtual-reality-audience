@@ -29,4 +29,10 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.zhaoxiaodan.miband:miband-sdk:1.1.2'
     compile 'com.google.android.gms:play-services:11.0.4'
+    compile 'com.google.vr:sdk-audio:1.10.0'
+    compile 'com.google.vr:sdk-base:1.10.0'
+    compile 'com.google.vr:sdk-common:1.10.0'
+    compile 'com.google.vr:sdk-commonwidget:1.10.0'
+    compile 'com.google.vr:sdk-panowidget:1.10.0'
+    compile 'com.google.vr:sdk-videowidget:1.10.0'
 }

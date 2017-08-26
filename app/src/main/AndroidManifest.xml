@@ -24,7 +24,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
+        <activity
+            android:name=".AudienceActivity"
+            >
+        </activity>
         <service
             android:name=".MainService"
             android:enabled="true"
