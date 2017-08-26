@@ -5,30 +5,22 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.os.Binder;
 import android.os.IBinder;
-import android.os.SystemClock;
-import android.util.Log;
-import android.widget.Chronometer;
-import android.widget.Toast;
 
 public class MainService extends Service {
     private boolean running = true;
     private Intent broadcastIntent;
-    private IntentFilter intentFilter = new IntentFilter();
     private float orientationPercentage;
+    private int heartRatePercentage;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        intentFilter = new IntentFilter();
+        IntentFilter intentFilter = new IntentFilter();
         broadcastIntent = new Intent();
         broadcastIntent.setAction("mainServiceAction");
         intentFilter.addAction("orientationServiceAction");
+        intentFilter.addAction("wearServiceAction");
         registerReceiver(mReceiver, intentFilter);
         new Thread(new Runnable() {
             public void run() {
@@ -38,9 +30,9 @@ public class MainService extends Service {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    broadcastIntent = new Intent();
-                    broadcastIntent.setAction("mainServiceAction");
-                    broadcastIntent.putExtra("data", orientationPercentage);
+                    broadcastIntent = new Intent("mainServiceAction");
+                    broadcastIntent.putExtra("orientationPercentage", orientationPercentage);
+                    broadcastIntent.putExtra("heartRatePercentage", orientationPercentage);
                     sendBroadcast(broadcastIntent);
                 }
             }
@@ -73,7 +65,6 @@ public class MainService extends Service {
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // Log data
             if (intent.getAction().equals("orientationServiceAction")) {
                 float orientedTime = Float.parseFloat(intent.getStringExtra("orientedTime"));
                 float disorientedTime = Float.parseFloat(intent.getStringExtra("disorientedTime"));
@@ -81,6 +72,19 @@ public class MainService extends Service {
                     orientedTime = 1;
                 }
                 orientationPercentage = (orientedTime / (orientedTime + disorientedTime)) * 100;
+            } else if (intent.getAction().equals("wearServiceAction")) {
+                heartRatePercentage = Integer.parseInt(intent.getStringExtra("heartRate"));
+                if (heartRatePercentage >= 140) {
+                    heartRatePercentage = 20;
+                } else if (heartRatePercentage >= 125) {
+                    heartRatePercentage = 40;
+                } else if (heartRatePercentage >= 115) {
+                    heartRatePercentage = 60;
+                } else if (heartRatePercentage >= 95) {
+                    heartRatePercentage = 80;
+                } else {
+                    heartRatePercentage = 100;
+                }
             }
         }
     };

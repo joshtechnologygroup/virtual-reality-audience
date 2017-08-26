@@ -35,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         intentFilter.addAction("mainServiceAction");
-        intentFilter.addAction("orientationServiceAction");
         requestRecordAudioPermission();
     }
 
