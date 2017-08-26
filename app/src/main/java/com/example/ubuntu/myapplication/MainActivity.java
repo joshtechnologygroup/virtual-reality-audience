@@ -40,28 +40,27 @@ public class MainActivity extends AppCompatActivity {
 
     protected void start() {
         Toast.makeText(this, "Start", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, OrientationService.class);
+        Intent intent = new Intent(this, SoundFeedbackService.class);
         startService(intent);
 //        intent = new Intent(this, WPMService.class);
 //        startService(intent);
-        intent = new Intent(this, WearService.class);
-        startService(intent);
-        intent = new Intent(this, MainService.class);
-        startService(intent);
+//        intent = new Intent(this, WearService.class);
+//        startService(intent);
+//        intent = new Intent(this, MainService.class);
+//        startService(intent);
         mainServiceRunning = true;
     }
 
     protected void stop() {
         Toast.makeText(getApplicationContext(), "Stop", Toast.LENGTH_LONG).show();
-        Intent intent = new Intent(this, MainService.class);
+        Intent intent = new Intent(this, SoundFeedbackService.class);
         stopService(intent);
-        intent = new Intent(this, OrientationService.class);
-        stopService(intent);
+//        intent = new Intent(this, OrientationService.class);
+//        stopService(intent);
 //        intent = new Intent(this, WPMService.class);
 //        stopService(intent);
-        intent = new Intent(this, WearService.class);
-        stopService(intent);
-
+//        intent = new Intent(this, WearService.class);
+//        stopService(intent);
         mainServiceRunning = false;
     }
 
