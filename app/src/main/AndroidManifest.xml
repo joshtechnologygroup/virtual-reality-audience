@@ -20,7 +20,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <service
             android:name=".MainService"
             android:enabled="true"
@@ -33,6 +32,10 @@
             android:name=".OrientationService"
             android:enabled="true"
             android:exported="true"></service>
+        <activity
+            android:name=".AudienceActivity"
+            >
+        </activity>
     </application>
 
 </manifest>
