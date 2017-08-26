@@ -22,12 +22,14 @@ public class MainActivity extends AppCompatActivity {
     private IntentFilter intentFilter = new IntentFilter();
     private Context context;
     private TextView textView;
+    private String [] requiredPermissions = new String[]{Manifest.permission.RECORD_AUDIO};
 
-    private void requestRecordAudioPermission() {
+    private void requestSystemPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            String requiredPermission = Manifest.permission.RECORD_AUDIO;
-            if (checkCallingOrSelfPermission(requiredPermission) == PackageManager.PERMISSION_DENIED) {
-                requestPermissions(new String[]{requiredPermission}, 101);
+            for (String requiredPermission : requiredPermissions) {
+                if (checkCallingOrSelfPermission(requiredPermission) == PackageManager.PERMISSION_DENIED) {
+                    requestPermissions(new String[]{requiredPermission}, 101);
+                }
             }
         }
     }
@@ -36,14 +38,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         intentFilter.addAction("mainServiceAction");
-//        intentFilter.addAction("wpmServiceAction");
-//        requestRecordAudioPermission();
+        requestSystemPermissions();
     }
 
     protected void start() {
         Toast.makeText(this, "Start", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, OrientationService.class);
         startService(intent);
+        Intent wpsIntent = new Intent(this, WPMService.class);
+        startService(wpsIntent);
         Intent mainIntent = new Intent(this, MainService.class);
         startService(mainIntent);
         mainServiceRunning = true;
@@ -53,8 +56,10 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Stop", Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, OrientationService.class);
         Intent mainIntent = new Intent(this, MainService.class);
+        Intent wpsIntent = new Intent(this, WPMService.class);
         stopService(mainIntent);
         stopService(intent);
+        stopService(wpsIntent);
         mainServiceRunning = false;
 
     }
@@ -84,6 +89,13 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         registerReceiver(mReceiver, intentFilter);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stop();
+        unregisterReceiver(mReceiver);
     }
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {

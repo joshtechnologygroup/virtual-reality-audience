@@ -5,11 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.widget.Chronometer;
@@ -20,9 +15,9 @@ public class MainService extends Service {
     private Chronometer mChronometer;
     private Intent broadcastIntent;
     private IntentFilter intentFilter = new IntentFilter();
-//    long speechLength = 0;
-//    long pauseLength = 0;
-//    float wps = 0;
+    long speechLength = 0;
+    long pauseLength = 0;
+    float wps = 0;
 
     @Override
     public void onCreate() {
@@ -33,6 +28,7 @@ public class MainService extends Service {
         broadcastIntent = new Intent();
         broadcastIntent.setAction("mainServiceAction");
         intentFilter.addAction("orientationServiceAction");
+        intentFilter.addAction("wpmServiceAction");
         registerReceiver(mReceiver, intentFilter);
         new Thread(new Runnable() {
             public void run() {
@@ -77,6 +73,7 @@ public class MainService extends Service {
         super.onDestroy();
         running = false;
         mChronometer.stop();
+        unregisterReceiver(mReceiver);
     }
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -87,16 +84,17 @@ public class MainService extends Service {
                 Toast.makeText(getApplicationContext(), intent.getStringExtra("Data"),
                         Toast.LENGTH_SHORT).show();
             }
-//                speechLength = intent.getIntExtra("speechLength", 0);
-//                pauseLength = intent.getIntExtra("pauseLength", 0);
-//                wps = intent.getFloatExtra("wps", 0);
-//                Toast.makeText(
-//                    getApplicationContext(),
-//                    "spelength:" + speechLength + ", paulength:" + pauseLength + ", wps:" + wps,
-//                    Toast.LENGTH_LONG
-//                ).show();
-//            }
-        }
+            if (intent.getAction().equals("wpmServiceAction")) {
+                speechLength = intent.getIntExtra("speechLength", 0);
+                pauseLength = intent.getIntExtra("pauseLength", 0);
+                wps = intent.getFloatExtra("wps", 0);
+                Toast.makeText(
+                    getApplicationContext(),
+                    "spelength:" + speechLength + ", paulength:" + pauseLength + ", wps:" + wps,
+                    Toast.LENGTH_LONG
+                ).show();
+            }
+            }
     };
 
 }

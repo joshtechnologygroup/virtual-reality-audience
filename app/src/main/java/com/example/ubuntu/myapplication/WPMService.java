@@ -7,7 +7,7 @@ import android.os.IBinder;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
-import android.widget.Toast;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -18,6 +18,9 @@ public class WPMService extends Service {
     long pauseLength = 0;
     long startTimeStamp, endTimeStamp;
     float wps = 0;
+    public String mError;
+    private static final String TAG = "WPMService";
+
     public WPMService() {
     }
 
@@ -25,16 +28,18 @@ public class WPMService extends Service {
     public void onCreate() {
         super.onCreate();
         startTimeStamp = System.currentTimeMillis();
-        startListening();
-    }
-
-    public void startListening() {
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-        speechRecognizer.setRecognitionListener(new listener());
         speechIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         speechIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, "com.example.ubuntu.myapplication");
         speechIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 0);
         speechIntent.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true);
+        startListening();
+    }
+
+    public void startListening() {
+        if(speechRecognizer == null) {
+            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+            speechRecognizer.setRecognitionListener(new listener());
+        }
         speechRecognizer.startListening(speechIntent);
     }
 
@@ -84,8 +89,43 @@ public class WPMService extends Service {
         }
 
         @Override
-        public void onError(int i) {
+        public void onError(int error) {
+            mError = "";
+            switch (error) {
+                case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+                    mError = " network timeout";
+                    startListening();
+                    break;
+                case SpeechRecognizer.ERROR_NETWORK:
+                    mError = " network" ;
+                    break;
+                case SpeechRecognizer.ERROR_AUDIO:
+                    mError = " audio";
+                    break;
+                case SpeechRecognizer.ERROR_SERVER:
+                    mError = " server";
+                    startListening();
+                    break;
+                case SpeechRecognizer.ERROR_CLIENT:
+                    mError = " client";
+                    break;
+                case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
+                    mError = " speech time out" ;
+                    startListening();
+                    break;
+                case SpeechRecognizer.ERROR_NO_MATCH:
+                    mError = " no match" ;
+                    startListening();
+                    break;
+                case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+                    mError = " recogniser busy" ;
+                    break;
+                case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+                    mError = " insufficient permissions" ;
+                    break;
 
+            }
+            Log.e(TAG,  "Error: " +  error + " - " + mError);
         }
 
         public void onResults(Bundle results) {
